@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Visitor Entry System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe, #bfdbfe, #c4b5fd, #d1d5db);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 600px;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 2px solid #000;
+            width: 100%;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group label {
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .input-field {
+            padding: 0.75rem 1rem;
+            border: 2px solid #000;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            transition: all 0.2s ease-in-out;
+            font-weight: 600;
+            color: #1f2937;
+            background-color: #f9fafb;
+        }
+        .input-field:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
+            border-color: #3b82f6;
+        }
+        .btn-3d {
+            padding: 0.8rem 1.5rem;
+            font-weight: 800;
+            color: white;
+            border-radius: 1rem;
+            border: 2px solid #000;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 8px 0 0 #4b5563, 0 12px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d:active {
+            transform: translateY(4px) translateZ(-4px);
+            box-shadow: 0 4px 0 0 #4b5563, 0 8px 6px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d.bg-green-600 {
+            background-color: #16a34a;
+            box-shadow: 0 8px 0 0 #15803d, 0 12px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d.bg-green-600:active {
+            background-color: #15803d;
+            transform: translateY(4px) translateZ(-4px);
+            box-shadow: 0 4px 0 0 #15803d, 0 8px 6px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d.bg-blue-600 {
+            background-color: #2563eb;
+            box-shadow: 0 8px 0 0 #1e40af, 0 12px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d.bg-blue-600:active {
+            background-color: #1e40af;
+            transform: translateY(4px) translateZ(-4px);
+            box-shadow: 0 4px 0 0 #1e40af, 0 8px 6px rgba(0, 0, 0, 0.2);
+        }
+        .message-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid #000;
+            display: none;
+        }
+        .message-success { background-color: #dcfce7; color: #166534; border-color: #15803d; }
+        .message-error { background-color: #fee2e2; color: #991b1b; border-color: #b91c1c; }
+        .message-info { background-color: #e0f2fe; color: #075985; border-color: #0c4a6e; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-8">REGISTER</h1>
+
+        <!-- Building Registration Form -->
+        <div class="mb-8 p-6 border-2 border-gray-400 rounded-xl bg-gray-100 shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">Register New Building</h2>
+            <form id="buildingRegisterForm" class="space-y-4">
+                <div class="input-group">
+                    <label for="buildingName" class="block text-lg">Building Name</label>
+                    <input type="text" id="buildingName" name="building_name" required class="input-field">
+                </div>
+                <div class="input-group">
+                    <label for="buildingAddress" class="block text-lg">Address (Optional)</label>
+                    <textarea id="buildingAddress" name="building_address" rows="2" class="input-field"></textarea>
+                </div>
+                <button type="submit" class="w-full btn-3d bg-green-600">
+                    REGISTER BUILDING
+                </button>
+            </form>
+            <div id="buildingMessageBox" class="message-info"></div>
+        </div>
+
+        <!-- User Registration Form -->
+        <div class="p-6 border-2 border-gray-400 rounded-xl bg-gray-100 shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">Register New User</h2>
+            <form id="userRegisterForm" class="space-y-4">
+                <div class="input-group">
+                    <label for="username" class="block text-lg">Username</label>
+                    <input type="text" id="username" name="username" required class="input-field">
+                </div>
+                <div class="input-group">
+                    <label for="password" class="block text-lg">Password</label>
+                    <input type="password" id="password" name="password" required class="input-field">
+                </div>
+                <div class="input-group">
+                    <label for="userRole" class="block text-lg">User Role</label>
+                    <select id="userRole" name="user_role" required class="input-field">
+                        <option value="guard">Guard</option>
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="buildingSelect" class="block text-lg">Assign to Building</label>
+                    <select id="buildingSelect" name="building_id" required class="input-field">
+                        <option value="">Loading buildings...</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full btn-3d bg-blue-600">
+                    REGISTER USER
+                </button>
+            </form>
+            <div id="userMessageBox" class="message-info"></div>
+        </div>
+
+        <p class="text-center text-gray-600 font-medium text-lg mt-8">
+            <a href="/frontend/login.html" class="text-blue-800 font-extrabold hover:underline">Go to Admin Login</a>
+        </p>
+    </div>
+
+    <script>
+        const buildingRegisterForm = document.getElementById('buildingRegisterForm');
+        const buildingNameInput = document.getElementById('buildingName');
+        const buildingAddressInput = document.getElementById('buildingAddress');
+        const buildingMessageBox = document.getElementById('buildingMessageBox');
+
+        const userRegisterForm = document.getElementById('userRegisterForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const userRoleSelect = document.getElementById('userRole');
+        const buildingSelect = document.getElementById('buildingSelect');
+        const userMessageBox = document.getElementById('userMessageBox');
+
+        function showMessage(boxElement, message, type) {
+            boxElement.textContent = message;
+            boxElement.className = `message-box ${type ? `message-${type}` : 'message-info'}`;
+            boxElement.style.display = 'block';
+            setTimeout(() => {
+                boxElement.style.display = 'none';
+                boxElement.textContent = '';
+                boxElement.className = 'message-box';
+            }, 5000);
+        }
+
+        buildingRegisterForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const buildingName = buildingNameInput.value;
+            const buildingAddress = buildingAddressInput.value;
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/buildings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ building_name: buildingName, building_address: buildingAddress })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage(buildingMessageBox, `Building "${buildingName}" registered successfully!`, 'success');
+                    buildingRegisterForm.reset();
+                    fetchBuildingsForDropdown();
+                } else {
+                    showMessage(buildingMessageBox, `Error registering building: ${result.message || 'Something went wrong'}`, 'error');
+                }
+            } catch (error) {
+                console.error("Network error or server issue:", error);
+                showMessage(buildingMessageBox, "Could not connect to the server. Please ensure the backend is running.", 'error');
+            }
+        });
+
+        userRegisterForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            const userRole = userRoleSelect.value;
+            const buildingId = buildingSelect.value;
+
+            if (!buildingId) {
+                showMessage(userMessageBox, "Please select a building.", 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password, user_role: userRole, building_id: parseInt(buildingId) })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage(userMessageBox, `User "${username}" registered successfully!`, 'success');
+                    userRegisterForm.reset();
+                } else {
+                    showMessage(userMessageBox, `Error registering user: ${result.message || 'Something went wrong'}`, 'error');
+                }
+            } catch (error) {
+                console.error("Network error or server issue:", error);
+                showMessage(userMessageBox, "Could not connect to the server. Please ensure the backend is running.", 'error');
+            }
+        });
+
+        async function fetchBuildingsForDropdown() {
+            buildingSelect.innerHTML = '<option value="">Loading buildings...</option>';
+            try {
+                const response = await fetch('http://127.0.0.1:5000/buildings');
+                const buildings = await response.json();
+
+                if (response.ok && buildings.length > 0) {
+                    buildingSelect.innerHTML = '<option value="">-- Select a Building --</option>';
+                    buildings.forEach(building => {
+                        const option = document.createElement('option');
+                        option.value = building.building_id;
+                        option.textContent = building.building_name;
+                        buildingSelect.appendChild(option);
+                    });
+                } else if (response.ok && buildings.length === 0) {
+                    buildingSelect.innerHTML = '<option value="">No buildings found. Register one first!</option>';
+                    showMessage(userMessageBox, "No buildings found. Please register a building first before registering a user.", 'info');
+                } else {
+                    showMessage(userMessageBox, `Error loading buildings: ${buildings.message || 'Something went wrong'}`, 'error');
+                    buildingSelect.innerHTML = '<option value="">Error loading buildings</option>';
+                }
+            } catch (error) {
+                console.error("Error fetching buildings for dropdown:", error);
+                showMessage(userMessageBox, "Could not load buildings. Is the backend running?", 'error');
+                buildingSelect.innerHTML = '<option value="">Could not load buildings</option>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchBuildingsForDropdown);
+    </script>
+</body>
+</html>

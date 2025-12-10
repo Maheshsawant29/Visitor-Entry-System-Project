@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Visitor Entry System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe, #bfdbfe, #c4b5fd, #d1d5db);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 1400px;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 2px solid #000;
+            width: 100%;
+        }
+        .table-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            border: 2px solid #000;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #f9fafb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-weight: 800;
+            color: #1f2937;
+            border-bottom: 2px solid #000;
+        }
+        tr:nth-child(even) {
+            background-color: #f3f4f6;
+        }
+        .checkout-btn {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            border-radius: 9999px;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid #000;
+            position: relative;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 0 0 #dc2626;
+        }
+        .checkout-btn:active {
+            transform: translateY(2px) translateZ(-2px);
+            box-shadow: 0 2px 0 0 #dc2626;
+        }
+        .status-in { color: #16a34a; font-weight: 800; }
+        .status-out { color: #b91c1c; font-weight: 800; }
+        .btn-3d {
+            padding: 0.8rem 1.5rem;
+            font-weight: 800;
+            color: white;
+            border-radius: 1rem;
+            border: 2px solid #000;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 8px 0 0 #4b5563, 0 12px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d:active {
+            transform: translateY(4px) translateZ(-4px);
+            box-shadow: 0 4px 0 0 #4b5563, 0 8px 6px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d.bg-blue-600 {
+            background-color: #2563eb;
+            box-shadow: 0 8px 0 0 #1e40af, 0 12px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d.bg-blue-600:active {
+            background-color: #1e40af;
+            transform: translateY(4px) translateZ(-4px);
+            box-shadow: 0 4px 0 0 #1e40af, 0 8px 6px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen p-4">
+    <div class="container">
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
+            <h1 class="text-4xl font-extrabold text-gray-800">ADMIN DASHBOARD</h1>
+            <div class="text-center sm:text-right">
+                <p class="text-gray-700 text-lg font-bold" id="loggedInUserDisplay"></p>
+                <p class="text-gray-600 text-base font-medium" id="loggedInBuildingDisplay"></p>
+                <button id="logoutButton" class="px-4 py-2 mt-2 bg-red-600 text-white font-bold rounded-lg shadow-md hover:bg-red-700 transition duration-150 ease-in-out">
+                    LOGOUT
+                </button>
+            </div>
+        </div>
+
+        <div id="authMessage" class="message-box message-error mb-4 hidden">
+            <span class="font-bold">Access Denied:</span> You are not logged in or your session has expired. Please <a href="/frontend/login.html" class="text-blue-800 underline font-bold">login here</a>.
+        </div>
+
+        <div id="dashboardContent" class="w-full hidden">
+            <div class="mb-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button id="refreshButton" class="w-full sm:w-auto btn-3d bg-blue-600">
+                    REFRESH LOGS
+                </button>
+                <p class="text-center text-gray-600 font-medium text-lg">
+                    <a href="/frontend/index.html" class="text-blue-800 font-extrabold hover:underline">Go to Visitor Entry Form</a>
+                </p>
+            </div>
+
+            <div id="loadingMessage" class="text-center text-xl text-gray-600 mb-4 hidden font-bold">Loading visitor data...</div>
+            <div id="errorMessage" class="message-box message-error mb-4 hidden"></div>
+
+            <div class="table-container">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="py-4 px-4 rounded-tl-lg">ID</th>
+                            <th class="py-4 px-4">Photo</th>
+                            <th class="py-4 px-4">Name</th>
+                            <th class="py-4 px-4">Room</th>
+                            <th class="py-4 px-4">Purpose</th>
+                            <th class="py-4 px-4">Visitor Mobile</th>
+                            <th class="py-4 px-4">Owner Mobile</th>
+                            <th class="py-4 px-4">Entry Time</th>
+                            <th class="py-4 px-4">Exit Time</th>
+                            <th class="py-4 px-4">Status</th>
+                            <th class="py-4 px-4 rounded-tr-lg">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitorTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Visitor rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="noVisitorsMessage" class="text-center text-gray-500 mt-6 hidden font-bold text-lg">No visitor entries found.</div>
+        </div>
+    </div>
+
+    <script>
+        const visitorTableBody = document.getElementById('visitorTableBody');
+        const refreshButton = document.getElementById('refreshButton');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const noVisitorsMessage = document.getElementById('noVisitorsMessage');
+        const authMessage = document.getElementById('authMessage');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const loggedInUserDisplay = document.getElementById('loggedInUserDisplay');
+        const loggedInBuildingDisplay = document.getElementById('loggedInBuildingDisplay');
+        const logoutButton = document.getElementById('logoutButton');
+
+        let jwtToken = localStorage.getItem('jwt_token');
+        let userInfo = JSON.parse(localStorage.getItem('user_info'));
+
+        function showCustomAlert(message) {
+            const modal = document.createElement('div');
+            modal.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:2rem; background:white; border:2px solid black; border-radius:1rem; box-shadow:0 10px 20px rgba(0,0,0,0.2); z-index:1000; text-align:center; max-width:400px; font-family: 'Inter', sans-serif;";
+            modal.innerHTML = `
+                <p class="font-bold text-xl mb-4">${message}</p>
+                <button class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg mt-4" onclick="this.parentNode.remove()">OK</button>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showErrorMessage(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 5000);
+        }
+
+        async function fetchVisitors() {
+            if (!jwtToken) {
+                authMessage.style.display = 'block';
+                dashboardContent.style.display = 'none';
+                return;
+            }
+
+            loadingMessage.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            noVisitorsMessage.classList.add('hidden');
+            visitorTableBody.innerHTML = '';
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/visitors', {
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+                const visitors = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        showErrorMessage(`Authentication Error: ${visitors.message || 'Please login again.'}`);
+                        localStorage.removeItem('jwt_token');
+                        localStorage.removeItem('user_info');
+                        authMessage.style.display = 'block';
+                        dashboardContent.style.display = 'none';
+                        window.location.href = '/frontend/login.html';
+                        return;
+                    }
+                    throw new Error(visitors.message || 'Failed to fetch visitors');
+                }
+
+                if (visitors.length === 0) {
+                    noVisitorsMessage.classList.remove('hidden');
+                    return;
+                }
+
+                visitors.forEach(visitor => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-100 transition duration-150 ease-in-out';
+                    row.innerHTML = `
+                        <td class="py-4 px-4 text-sm font-medium text-gray-900">${visitor.id}</td>
+                        <td class="py-4 px-4">
+                            <img src="${visitor.photo_url}" alt="Visitor Photo" class="w-16 h-16 rounded-lg object-cover border-2 border-gray-400">
+                        </td>
+                        <td class="py-4 px-4 text-sm font-medium text-gray-900">${visitor.name}</td>
+                        <td class="py-4 px-4 text-sm font-medium text-gray-900">${visitor.room_number}</td>
+                        <td class="py-4 px-4 text-sm font-medium text-gray-900">${visitor.purpose}</td>
+                        <td class="py-4 px-4 text-sm font-medium text-gray-900">${visitor.visitor_mobile || 'N/A'}</td>
+                        <td class="py-4 px-4 text-sm font-medium text-gray-900">${visitor.room_owner_mobile || 'N/A'}</td>
+                        <td class="py-4 px-4 text-sm font-medium text-gray-900">${visitor.entry_time || 'N/A'}</td>
+                        <td class="py-4 px-4 text-sm font-medium text-gray-900">${visitor.exit_time || 'N/A'}</td>
+                        <td class="py-4 px-4 text-sm font-extrabold">
+                            <span class="${visitor.status === 'IN' ? 'status-in' : 'status-out'}">
+                                ${visitor.status}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4">
+                            ${visitor.status === 'IN' ? 
+                                `<button data-id="${visitor.id}" class="checkout-btn">
+                                    CHECK OUT
+                                </button>` : ''
+                            }
+                        </td>
+                    `;
+                    visitorTableBody.appendChild(row);
+                });
+
+                document.querySelectorAll('.checkout-btn').forEach(button => {
+                    button.addEventListener('click', handleCheckout);
+                });
+
+            } catch (error) {
+                console.error("Error fetching visitors:", error);
+                showErrorMessage(`Failed to load visitor data. Please ensure the backend is running. Error: ${error.message}`);
+            } finally {
+                loadingMessage.classList.add('hidden');
+            }
+        }
+
+        async function handleCheckout(event) {
+            const visitorId = event.target.dataset.id;
+            // Using a custom modal for confirmation
+            const confirmed = await new Promise(resolve => {
+                const modal = document.createElement('div');
+                modal.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:2rem; background:white; border:2px solid black; border-radius:1rem; box-shadow:0 10px 20px rgba(0,0,0,0.2); z-index:1000; text-align:center; max-width:400px; font-family: 'Inter', sans-serif;";
+                modal.innerHTML = `
+                    <p class="font-bold text-lg mb-4">Are you sure you want to check out visitor ID ${visitorId}?</p>
+                    <button id="confirm-yes" class="px-6 py-2 bg-green-600 text-white font-bold rounded-lg mt-4 mr-2">YES</button>
+                    <button id="confirm-no" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg mt-4">NO</button>
+                `;
+                document.body.appendChild(modal);
+
+                document.getElementById('confirm-yes').onclick = () => { modal.remove(); resolve(true); };
+                document.getElementById('confirm-no').onclick = () => { modal.remove(); resolve(false); };
+            });
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/visitor/${visitorId}/checkout`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    showCustomAlert(result.message);
+                    fetchVisitors();
+                } else if (response.status === 401 || response.status === 403) {
+                    showErrorMessage(`Authentication Error: ${result.message || 'Please login again.'}`);
+                    localStorage.removeItem('jwt_token');
+                    localStorage.removeItem('user_info');
+                    authMessage.style.display = 'block';
+                    dashboardContent.style.display = 'none';
+                    window.location.href = '/frontend/login.html';
+                } else {
+                    showCustomAlert(`Error checking out: ${result.message || 'Something went wrong'}`);
+                }
+            } catch (error) {
+                console.error("Network error during checkout:", error);
+                showCustomAlert("Could not connect to the server to check out visitor.");
+            }
+        }
+
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user_info');
+            window.location.href = '/frontend/login.html';
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (jwtToken && userInfo) {
+                authMessage.style.display = 'none';
+                dashboardContent.style.display = 'block';
+                loggedInUserDisplay.textContent = `Logged in as: ${userInfo.username} (${userInfo.user_role})`;
+                if (userInfo.building_name) {
+                    loggedInBuildingDisplay.textContent = `Building: ${userInfo.building_name}`;
+                } else if (userInfo.building_id) {
+                    fetch(`http://127.0.0.1:5000/buildings`)
+                        .then(res => res.json())
+                        .then(buildings => {
+                            const building = buildings.find(b => b.building_id === userInfo.building_id);
+                            if (building) {
+                                loggedInBuildingDisplay.textContent = `Building: ${building.building_name}`;
+                            }
+                        })
+                        .catch(err => console.error("Error fetching building name:", err));
+                }
+                fetchVisitors();
+            } else {
+                authMessage.style.display = 'block';
+                dashboardContent.style.display = 'none';
+            }
+        });
+
+        refreshButton.addEventListener('click', fetchVisitors);
+    </script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Visitor Entry System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe, #bfdbfe, #c4b5fd, #d1d5db); /* Gradient background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 450px;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 2px solid #000;
+            width: 100%;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group label {
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .input-field {
+            padding: 0.75rem 1rem;
+            border: 2px solid #000;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            transition: all 0.2s ease-in-out;
+            font-weight: 600;
+            color: #1f2937;
+            background-color: #f9fafb;
+        }
+        .input-field:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
+            border-color: #3b82f6;
+        }
+        .btn-3d {
+            padding: 0.8rem 1.5rem;
+            font-weight: 800;
+            color: white;
+            border-radius: 1rem;
+            border: 2px solid #000;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 8px 0 0 #4b5563, 0 12px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d:active {
+            transform: translateY(4px) translateZ(-4px);
+            box-shadow: 0 4px 0 0 #4b5563, 0 8px 6px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d.bg-blue-600 {
+            background-color: #2563eb;
+            box-shadow: 0 8px 0 0 #1e40af, 0 12px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d.bg-blue-600:active {
+            background-color: #1e40af;
+            transform: translateY(4px) translateZ(-4px);
+            box-shadow: 0 4px 0 0 #1e40af, 0 8px 6px rgba(0, 0, 0, 0.2);
+        }
+        .message-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid #000;
+            display: none;
+        }
+        .message-success { background-color: #dcfce7; color: #166534; border-color: #15803d; }
+        .message-error { background-color: #fee2e2; color: #991b1b; border-color: #b91c1c; }
+        .message-info { background-color: #e0f2fe; color: #075985; border-color: #0c4a6e; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-8">ADMIN LOGIN</h1>
+
+        <form id="loginForm" class="space-y-6">
+            <div class="input-group">
+                <label for="username" class="block text-lg">Username</label>
+                <input type="text" id="username" name="username" required class="input-field">
+            </div>
+
+            <div class="input-group">
+                <label for="password" class="block text-lg">Password</label>
+                <input type="password" id="password" name="password" required class="input-field">
+            </div>
+
+            <button type="submit" class="w-full btn-3d bg-blue-600">
+                LOGIN
+            </button>
+        </form>
+
+        <div id="messageBox" class="message-info"></div>
+
+        <p class="text-center text-gray-600 font-medium text-lg mt-8">
+            <a href="/frontend/index.html" class="text-blue-800 font-extrabold hover:underline">Go to Visitor Entry Form</a>
+        </p>
+        <p class="text-center text-gray-600 font-medium text-lg mt-2">
+            New user or building? <a href="/frontend/register.html" class="text-blue-800 font-extrabold hover:underline">Register here</a>.
+        </p>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const messageBox = document.getElementById('messageBox');
+
+        // This function clears any previous tokens on page load to prevent refresh loops
+        window.onload = function() {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user_info');
+        };
+
+        function showMessage(boxElement, message, type) {
+            boxElement.textContent = message;
+            boxElement.className = `message-box ${type ? `message-${type}` : 'message-info'}`;
+            boxElement.style.display = 'block';
+            setTimeout(() => {
+                boxElement.style.display = 'none';
+                boxElement.textContent = '';
+                boxElement.className = 'message-box';
+            }, 5000);
+        }
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            if (!username || !password) {
+                showMessage(messageBox, "Please enter both username and password.", 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('jwt_token', result.token);
+                    localStorage.setItem('user_info', JSON.stringify(result.user));
+
+                    showMessage(messageBox, "Login successful! Redirecting...", 'success');
+                    window.location.href = '/frontend/admin.html'; 
+                } else {
+                    showMessage(messageBox, `Login failed: ${result.message || 'Invalid credentials'}`, 'error');
+                }
+            } catch (error) {
+                console.error("Network error or server issue:", error);
+                showMessage(messageBox, "Could not connect to the server. Please check if the backend is running.", 'error');
+            }
+        });
+    </script>
+</body>
+</html>

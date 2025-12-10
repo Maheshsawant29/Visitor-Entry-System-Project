@@ -1,0 +1,9 @@
+# Virtual Environment
+    venv/
+    # Python compiled files
+    __pycache__/
+    *.pyc
+    # Database configuration (sensitive info)
+    # NOTE: It's good practice to IGNORE the DB credentials in the real app,
+    # but for this project, you might keep app.py if it contains placeholders.
+    # We will exclude the venv folder for sure.
